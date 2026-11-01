@@ -90,20 +90,21 @@ static void load_wave(FILE *file, Scene *scene, const int wave_idx) {
             spawner_idx++;
         }
     }
+
+    free(queues);
 }
 
 static void load_waves(Scene *scene) {
-    int i = 1;
-    while (true) {
-        char *filename = malloc(32);
-        sprintf(filename, "res/wave%c.txt", '0' + i);
+    char filename[32];
+    for (int i = 1; i <= WAVE_COUNT; i++) {
+        snprintf(filename, sizeof filename, "res/wave%d.txt", i);
         FILE *file = fopen(filename, "r");
-        if (!file || i > WAVE_COUNT) {
+        if (!file) {
             break;
         }
 
         load_wave(file, scene, i);
-        i++;
+        fclose(file);
     }
 }
 

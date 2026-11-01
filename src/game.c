@@ -13,17 +13,17 @@
 #define TOWER_RANGE                 3
 #define SALT_CANNON_ATTACK_INTERVAL 4
 #define SALT_CANNON_RANGE           4
-#define SPAWN_INTERVAL              2
+#define SPAWN_INTERVAL              3
 #define COLLECT_INTERVAL            5
-#define PAUSE_COOLDOWN              1.5
+#define PAUSE_COOLDOWN              0.5
 
 static float pause_times[] = {
     5.0f,
+    4.75f,
     4.5f,
+    4.0f,
     3.5f,
     3.0f,
-    2.75f,
-    2.5f,
 };
 
 static Entity *get_closest_target(const Game *game, const Vector2 position) {
@@ -207,6 +207,7 @@ static void update_entity(Entity *entity, Game *game, const float delta_time) {
                 }
 
                 target->data.m.health--;
+                target->data.m.target_count--;
                 if (target->data.m.health <= 0) {
                     if (is_friendly(target->data.m)) {
                         play_sfx(&game->audio_store, "WrongEnemyKilled");
@@ -253,13 +254,15 @@ static void update_entity(Entity *entity, Game *game, const float delta_time) {
                     break;
                 case MONSTER_GHOST:
                     play_sfx(&game->audio_store, "GhostHit");
-                    target->data.m.health -= 2;
+                    target->data.m.health--;
+                    target->data.m.target_count--;
                     break;
                 default:
                     break;
                 }
 
-                target->data.m.health--;
+                target->data.m.health -= 2;
+              target->data.m.target_count -=2;
                 if (target->data.m.health <= 0) {
                     if (is_friendly(target->data.m)) {
                         play_sfx(&game->audio_store, "WrongEnemyKilled");
@@ -345,7 +348,11 @@ static void update_tile(Tile *tile, Game *game, const float delta_time) {
                     break;
                 }
 
-                target->data.m.target_count++;
+                target->data.m.target_count += 2;
+                if (target->data.m.monster_type == MONSTER_GHOST) {
+                    target->data.m.target_count++;
+                }
+
                 data->timer = 0.0f;
                 play_sfx(&game->audio_store, "TowerShoot");
 
@@ -750,6 +757,9 @@ void unload_game(Game *game) {
 }
 
 int update_game(Game *game, float delta_time) {
+  if (IsKeyPressed(KEY_A)) {
+    game->scene_idx = 3;
+  }
     if (game->current_wave == WAVE_COUNT - 1 && all_entities_dead(game) && all_spawners_finished(game)) {
         game->scene_idx = 3;
     }

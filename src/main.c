@@ -11,6 +11,8 @@ static void UpdateDrawFrame();
 static Game  game;
 static Sound music;
 
+static bool close = false;
+
 int main() {
     SetConfigFlags(FLAG_VSYNC_HINT | FLAG_MSAA_4X_HINT);
     InitWindow(1280, 720, "Knight Guard");
@@ -26,6 +28,7 @@ int main() {
 #else
     while (!WindowShouldClose()) {
         UpdateDrawFrame();
+        if (close) break;
     }
 #endif
 
@@ -42,6 +45,7 @@ void UpdateDrawFrame() {
     }
 
     if (update_game(&game, GetFrameTime()) == -1) {
+        close = true;
         return;
     }
 
